@@ -1,5 +1,6 @@
 import tkinter as tk
 import keyboard
+import mouse
 
 from util import WeaponAccessory
 
@@ -23,6 +24,7 @@ class Application:
         self.current_dist = 0
 
         self._init_keyboard()
+        self._init_mouse()
 
 
     def _init_tk(self) -> tuple[tk.Tk, tk.Toplevel, tk.Canvas, int, int]:
@@ -51,51 +53,56 @@ class Application:
         return root, top, canvas, screen_width, screen_height
 
     def _init_keyboard(self):
-        def _set_bead(delta_dist):
-            # 使用 _set_bead_y 而不是 self.set_bead_y 作为 keyboard.add_hotkey 的回调函数，
-            # 因为 keyboard.add_hotkey 将初始时 bead_xy 的值（而不是运行时值）传递给回调函数
-            x, y = self.bead_xy
-            sz = self.bead_size
-            delta_y = self.accessory.calculate_correcting(delta_dist)
-            self.set_bead((x, y+delta_y), 
-                          sz)
-            
-        def _set_label(delta_dist):
-            x, y = self.label_xy
-            delta_y = self.accessory.calculate_correcting(delta_dist)
-            self.set_label((x, y+delta_y), f"{self.current_dist} m")
-
-        def _call_back(agrs):
-            # arg:float = delta_dist
-            self.current_dist += agrs
-            _set_bead(agrs)
-            _set_label(agrs)
-            self.print_info()
-        
         #  left: -100 meter
         keyboard.add_hotkey(hotkey='left', 
-                            callback=_call_back, 
+                            callback=self._global_event_callback, 
                             args= [-100]
                             )
         #  right: 100 meter
         keyboard.add_hotkey(hotkey='right', 
-                            callback=_call_back, 
+                            callback=self._global_event_callback, 
                             args= [100]
                             )
         #  up: 50 meter
         keyboard.add_hotkey(hotkey='up', 
-                            callback=_call_back, 
+                            callback=self._global_event_callback, 
                             args= [50]
                             )
         #  down: -50 meter
         keyboard.add_hotkey(hotkey='down', 
-                            callback=_call_back, 
+                            callback=self._global_event_callback, 
                             args= [-50]
                             )
         #  choose accessory
         keyboard.add_hotkey(hotkey='up+down', 
                             callback=self.choose_accessory
                             )
+
+    def _init_mouse(self):
+        def on_scrool(event):
+            if isinstance(event, mouse.WheelEvent):
+                self._global_event_callback(event.delta*50)
+    
+        mouse.hook(on_scrool)
+
+    def _global_event_callback(self, delta_dist):
+        self.current_dist += delta_dist
+        
+        # 设置 tk_bead 的位置
+        x, y = self.bead_xy
+        sz = self.bead_size
+        delta_y = self.accessory.calculate_correcting(delta_dist)
+        self.set_bead((x, y+delta_y), 
+                        sz)
+        
+        # 设置 tk_label 的位置
+        x, y = self.label_xy
+        delta_y = self.accessory.calculate_correcting(delta_dist)
+        self.set_label((x, y+delta_y), f"{self.current_dist} m")
+        
+        # 打印信息
+        self.print_info()
+        
 
     @property
     def bead_xy(self):
