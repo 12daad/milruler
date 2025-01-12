@@ -1,0 +1,10 @@
+[
+    {
+        "weapon": "DXR-1", 
+        "barrel": "长枪管", 
+        "ammo": "高威力", 
+        "scope": "X12", 
+        "dist_per_mil": 560, 
+        "pixel_per_mil": 100.0
+    }
+]
