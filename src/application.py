@@ -1,3 +1,4 @@
+
 import tkinter as tk
 import keyboard
 import mouse
@@ -11,16 +12,20 @@ class Application:
     def run(self):
         self.tk_root.mainloop()
 
+    def exit(self):
+        pass
+        
+
     def __init__(self):
         self.accessory:WeaponAccessory = WeaponAccessory.WEAPON_ACCESSORY_LIST[0]
-        self.tk_root, self.top, self.tk_canvas, screen_width, screen_height = self._init_tk()
+        self.tk_root, self.tk_top, self.tk_canvas, screen_width, screen_height = self._init_tk()
         self.tk_center = (screen_width/2, screen_height/2)
-        self.tk_bead = self.tk_canvas.create_oval(screen_width/2-2, 
-                                  screen_height/2-2, 
-                                  screen_width/2+2, 
-                                  screen_height/2+2, 
+        self.tk_bead = self.tk_canvas.create_oval(screen_width/2-1, 
+                                  screen_height/2-1, 
+                                  screen_width/2+1, 
+                                  screen_height/2+1,
                                   outline='red')
-        self.label = self.tk_canvas.create_text(screen_width/2+100, screen_height/2, text="0 m", fill="blue")
+        self.label = self.tk_canvas.create_text(screen_width/2+100, screen_height/2, text="0 m", fill="blue", font=("Arial", 28))
         self.current_dist = 0
 
         self._init_keyboard()
@@ -53,10 +58,13 @@ class Application:
         return root, top, canvas, screen_width, screen_height
 
     def _init_keyboard(self):
+        """ 初始化键盘，为键盘事件绑定回调函数
+        
+        """
         #  left: -100 meter
         keyboard.add_hotkey(hotkey='left', 
                             callback=self._global_event_callback, 
-                            args= [-100]
+                            args= [-100] # args 必须是 iterable
                             )
         #  right: 100 meter
         keyboard.add_hotkey(hotkey='right', 
@@ -79,13 +87,21 @@ class Application:
                             )
 
     def _init_mouse(self):
+        """ 初始化鼠标，为鼠标滚轮事件绑定回调函数
+        
+        """
         def on_scrool(event):
             if isinstance(event, mouse.WheelEvent):
                 self._global_event_callback(event.delta*50)
     
-        mouse.hook(on_scrool)
+        mouse.hook(callback=on_scrool)
 
-    def _global_event_callback(self, delta_dist):
+    def _global_event_callback(self, delta_dist=0.0):
+        """ 用于更新画面内容，应该在所有的事件回调函数结束时调用，调用者负责计算并传入一个 `delta_dist` 参数
+
+        Args:
+            delta_dist (float): 瞄准距离的变化量
+        """
         self.current_dist += delta_dist
         
         # 设置 tk_bead 的位置
@@ -94,11 +110,11 @@ class Application:
         delta_y = self.accessory.calculate_correcting(delta_dist)
         self.set_bead((x, y+delta_y), 
                         sz)
-        
+
         # 设置 tk_label 的位置
         x, y = self.label_xy
         delta_y = self.accessory.calculate_correcting(delta_dist)
-        self.set_label((x, y+delta_y), f"{self.current_dist} m")
+        self.set_label((x, y+delta_y), f"{round(self.current_dist)} m")
         
         # 打印信息
         self.print_info()
@@ -119,7 +135,8 @@ class Application:
     
     @property
     def label_xy(self):
-        return self.tk_canvas.coords(self.label)
+        x, y = self.tk_canvas.coords(self.label)
+        return x, y
         
     
     def set_bead(self, xy, size):
@@ -137,7 +154,7 @@ class Application:
         self.tk_canvas.coords(self.label, x, y)
         self.tk_canvas.itemconfig(self.label, text=text)
 
-    def calibrate(self, current_dist, current_mil):
+    def calibrate_manually(self, current_dist, current_mil):
         # TODO 
         # 实现调用接口
         # 

@@ -1,10 +1,14 @@
-[
-    {
-        "weapon": "DXR-1", 
-        "barrel": "长枪管", 
-        "ammo": "高威力", 
-        "scope": "X12", 
-        "dist_per_mil": 560, 
-        "pixel_per_mil": 100.0
-    }
-]
+{
+    "WeaponAccessories": [
+        {
+            "weapon": "DXR-1",
+            "barrel": "长枪管",
+            "ammo": "高威力",
+            "scope": "X12",
+            "dist_per_mil": 560.0,
+            "pixel_per_mil": 33.92857142857143
+        }
+    ]
+
+
+}

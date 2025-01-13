@@ -18,8 +18,8 @@ class WeaponAccessory():
                 self.scope == another.scope and \
                 self.dist_per_mil == another.dist_per_mil and \
                 self.pixel_per_mil == another.pixel_per_mil
-                
-        
+
+
     def __init__(self, weapon, barrel, ammo, scope, dist_per_mil:float, pixel_per_mil:float):
         self.weapon = weapon
         self.barrel = barrel
@@ -30,7 +30,7 @@ class WeaponAccessory():
 
     def __str__(self):
         return f"{self.weapon}, {self.barrel}, {self.ammo}, {self.scope}"
-    
+
     def calculate_correcting(self, dist:float) -> float:
         """
             计算弹道校正值，单位为平面像素
@@ -50,16 +50,18 @@ def _init():
     try:
         with open(r"conf.json", 'r', encoding='utf-8') as file:
             conf = json.load(file)
+            accessories = conf["WeaponAccessories"]
     except Exception as e:
         print(e)
     
-    for it in conf:
-        accessory = WeaponAccessory(weapon=it["weapon"], 
-                                    barrel=it["barrel"],   
-                                    ammo=it["ammo"], 
-                                    scope=it["scope"],  
-                                    dist_per_mil=it["dist_per_mil"], 
-                                    pixel_per_mil=it["pixel_per_mil"])
-        WeaponAccessory.WEAPON_ACCESSORY_LIST.append(accessory)
-    
+    for accessory in accessories:
+        WeaponAccessory.WEAPON_ACCESSORY_LIST.append(
+                        WeaponAccessory(weapon=accessory["weapon"], 
+                                        barrel=accessory["barrel"],   
+                                        ammo=accessory["ammo"], 
+                                        scope=accessory["scope"],  
+                                        dist_per_mil=accessory["dist_per_mil"], 
+                                        pixel_per_mil=accessory["pixel_per_mil"])
+        )
+
 _init()
